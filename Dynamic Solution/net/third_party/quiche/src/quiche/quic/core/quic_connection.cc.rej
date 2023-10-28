@@ -1,0 +1,16 @@
+diff a/quiche/quic/core/quic_connection.cc b/quiche/quic/core/quic_connection.cc	(rejected hunks)
+@@ -359,6 +359,14 @@ QuicConnection::QuicConnection(
+     }
+   }
+   packet_creator_.SetDefaultPeerAddress(initial_peer_address);
++  // auto spdy_ping_address = getenv("ping_addr");
++  // if(spdy_ping_address !=nullptr){
++  //   std::string spdyPingAddress(spdy_ping_address);
++  //   std::string quicPeerAddress = initial_peer_address.ToString();
++  //   if(spdyPingAddress == quicPeerAddress){
++  //     // QUIC_DVLOG(0)<<"QUIC AND SPDY IPS MATCHED!"<<std::endl;
++  //   }
++  // }
+ }
+ 
+ void QuicConnection::InstallInitialCrypters(QuicConnectionId connection_id) {

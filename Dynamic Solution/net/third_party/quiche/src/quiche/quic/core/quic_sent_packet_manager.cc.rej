@@ -1,0 +1,98 @@
+diff a/quiche/quic/core/quic_sent_packet_manager.cc b/quiche/quic/core/quic_sent_packet_manager.cc	(rejected hunks)
+@@ -7,6 +7,10 @@
+ #include <algorithm>
+ #include <cstddef>
+ #include <string>
++#include<cstdlib>
++#include<vector>
++#include<iostream>
++#include<sstream>
+ 
+ #include "quiche/quic/core/congestion_control/general_loss_algorithm.h"
+ #include "quiche/quic/core/congestion_control/pacing_sender.h"
+@@ -1248,6 +1252,8 @@ bool QuicSentPacketManager::MaybeUpdateRTT(QuicPacketNumber largest_acked,
+ 
+   QuicTime::Delta send_delta = ack_receive_time - transmission_info.sent_time;
+   const bool min_rtt_available = !rtt_stats_.min_rtt().IsZero();
++  // const QuicTime now_time = clock_->ApproximateNow();
++  // QUIC_DVLOG(0) << "QUIC RTT used in congestion control: " << send_delta << " at time " << now_time;
+   rtt_stats_.UpdateRtt(send_delta, ack_delay_time, ack_receive_time);
+ 
+   if (!min_rtt_available && !rtt_stats_.min_rtt().IsZero()) {
+@@ -1577,6 +1583,76 @@ void QuicSentPacketManager::OnAckFrameStart(QuicPacketNumber largest_acked,
+       ack_delay_time = QuicTime::Delta::Zero();
+     }
+   }
++
++  // Checking if the largest_acked is present in the ping_packet_numbers set. 
++  auto idx = stats_->ping_packet_numbers.find(largest_acked);
++  if(idx != stats_->ping_packet_numbers.end()){
++    // Packet Number acked present in the set.
++    // Updating the ping counter & the ping_packet_numbers_set.
++    stats_->ping_counter ++;
++    stats_->ping_packet_numbers.erase(largest_acked);
++    const QuicTransmissionInfo& transmission_info = unacked_packets_.GetTransmissionInfo(largest_acked);
++    QuicTime::Delta rtt_computed = ack_receive_time - transmission_info.sent_time;
++    // Logging the information.
++    // QUIC_DVLOG(0) << "PING_PACKET_NO:" << largest_acked<<std::endl;
++    // QUIC_DVLOG(0)<<"PING_PACKET_NUMBERS_SET_SIZE: "<<size(stats_->ping_packet_numbers)<<std::endl;
++    QUIC_DVLOG(0) << "QUIC RTT: " << rtt_computed.ToMicroseconds() <<std::endl;
++    // QUIC_DVLOG(0) << "QUIC RTT COUNT: " << stats_->ping_counter<< std::endl;
++
++    // Fetching the environment variable value and processing as required:
++    auto currentList = getenv("quic_pings");
++    std::vector<int> pings;
++    // if(currentList == NULL){}
++    if(currentList != nullptr){
++        std::string pingsListString(currentList);
++        std::istringstream ss(pingsListString);
++        std::string token;
++        while (std::getline(ss, token, ',')) {
++            int intValue = std::stoi(token);
++            pings.push_back(intValue);
++        }
++    }
++
++    // Now, I have the list of ping-values of QUIC. Adding current ping value.
++    pings.push_back(rtt_computed.ToMicroseconds());
++
++    if(pings.size() < 10){
++        // Creating the updated string:
++        std::string result;
++        for (size_t i = 0; i < pings.size(); ++i) {
++            result += std::to_string(pings[i]);
++            if (i < pings.size() - 1) {
++                result += ",";
++            }
++        }
++        setenv("quic_pings", result.c_str(), 1);
++
++    }else{
++      // We have got 10 pings. Now, lets calculate the median value and clear the first 5 values from the list.
++      std::vector<int> temp;
++      for(int i =0;i<10;i++){
++        temp.push_back(pings[i]);
++      }
++      sort(temp.begin(), temp.end());
++      // Median value is the average value of the 2 middle values.
++      int median_value = (temp[4] + temp[5])/2;
++
++      // Flushing the first 5 values from ping_vector.
++      pings.erase(pings.begin(), pings.begin() + 5);
++      std::string result;
++        for (size_t i = 0; i < pings.size(); ++i) {
++            result += std::to_string(pings[i]);
++            if (i < pings.size() - 1) {
++                result += ",";
++            }
++        }
++      setenv("quic_pings", result.c_str(), 1);
++      // Setting the environment variable for the median_value.
++      setenv("quic_pings_median", std::to_string(median_value).c_str(), 1);
++      QUIC_DVLOG(0) << "NEW_QUIC_PING_MEDIAN_CALCULATED: "<<getenv("quic_pings_median")<<std::endl;
++    }
++    QUIC_DVLOG(0) << "QUIC_PINGS_LIST: "<<getenv("quic_pings")<<std::endl;
++  }
+   rtt_updated_ =
+       MaybeUpdateRTT(largest_acked, ack_delay_time, ack_receive_time);
+   last_ack_frame_.ack_delay_time = ack_delay_time;

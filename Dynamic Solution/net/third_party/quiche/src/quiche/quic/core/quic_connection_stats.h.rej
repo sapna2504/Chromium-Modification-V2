@@ -1,0 +1,21 @@
+diff a/quiche/quic/core/quic_connection_stats.h b/quiche/quic/core/quic_connection_stats.h	(rejected hunks)
+@@ -7,6 +7,8 @@
+ 
+ #include <cstdint>
+ #include <ostream>
++#include<set>   // For set storing QuicPacketNumbers once ping is sent.
++
+ 
+ #include "quiche/quic/core/quic_bandwidth.h"
+ #include "quiche/quic/core/quic_packets.h"
+@@ -131,6 +133,10 @@ struct QUIC_EXPORT_PRIVATE QuicConnectionStats {
+   // one or more lost packets.
+   uint32_t tcp_loss_events = 0;
+ 
++  // Adding a set for storing QuicPacketNumber of packets while sending RTT pings.
++  std::set<QuicPacketNumber> ping_packet_numbers;
++  uint64_t ping_counter = 0;
++
+   // Creation time, as reported by the QuicClock.
+   QuicTime connection_creation_time = QuicTime::Zero();
+ 
