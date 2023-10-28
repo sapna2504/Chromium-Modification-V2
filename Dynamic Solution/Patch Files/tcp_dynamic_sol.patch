@@ -238,7 +238,7 @@ index 10bfd84cc3734..09888a1d120b9 100644
  namespace {
  
 diff --git a/net/spdy/spdy_session.cc b/net/spdy/spdy_session.cc
-index d0f186b9bedd8..e7079d052c202 100644
+index d0f186b9bedd8..07a7b376be25c 100644
 --- a/net/spdy/spdy_session.cc
 +++ b/net/spdy/spdy_session.cc
 @@ -69,6 +69,8 @@
@@ -375,7 +375,7 @@ index d0f186b9bedd8..e7079d052c202 100644
    base::TimeDelta ping_duration = time_func_() - last_ping_sent_time_;
 +  // const char* pingAddr = getenv("ping_addr");
 +  // DVLOG(0) << "Time:" << GetAbsoluteCurrentTime() << std::endl;
-+  DVLOG(0) << "SPDY RTT:" << ping_duration.InMicroseconds();
++  DVLOG(0) << "TCP RTT:" << ping_duration.InMicroseconds();
 +  // setenv("SPDY latest RTT:", std::to_string(ping_duration.InMicroseconds()).c_str(), 1);
 +  // Fetching the environment variable value and processing as required:
 +    auto *currentList = getenv("spdy_pings");
@@ -427,7 +427,7 @@ index d0f186b9bedd8..e7079d052c202 100644
 +      setenv("spdy_pings", result.c_str(), 1);
 +      // Setting the environment variable for the median_value.
 +      setenv("spdy_pings_median", std::to_string(median_value).c_str(), 1);
-+      DVLOG(0) << "NEW_SPDY_PING_MEDIAN_CALCULATED: "<<getenv("spdy_pings_median")<<std::endl;
++      DVLOG(0) << "NEW_TCP_PING_MEDIAN_CALCULATED: "<<getenv("spdy_pings_median")<<std::endl;
 +
 +      // Checking if we can update the should_fallback_environment_variable:
 +      auto *quic_median = getenv("quic_pings_median");
@@ -451,7 +451,7 @@ index d0f186b9bedd8..e7079d052c202 100644
 +          // Updating the counter by 1
 +          current_rate_limited_counter += 1;
 +          setenv("rate_limited_counter", std::to_string(current_rate_limited_counter).c_str() ,1);
-+        }else if(quic_val >= 1000000 && median_value >= 1000000){
++        }else if(quic_val >= 100000 && median_value >= 100000){
 +          // Both are of the same order and are tending towards dynamic-very-low situation.
 +          current_dvl_counter += 1;
 +          setenv("dvl_counter", std::to_string(current_dvl_counter).c_str() ,1);
@@ -473,7 +473,7 @@ index d0f186b9bedd8..e7079d052c202 100644
 +        }
 +      }
 +    }
-+    DVLOG(0) << "SPDY_PINGS_LIST: "<<getenv("spdy_pings")<<std::endl;
++    DVLOG(0) << "TCP_PINGS_LIST: "<<getenv("spdy_pings")<<std::endl;
 +  //  -----------------------------------
    if (network_quality_estimator_) {
      network_quality_estimator_->RecordSpdyPingLatency(host_port_pair(),

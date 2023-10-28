@@ -7,27 +7,6 @@ We have modified the following four files in [chromium](https://github.com/chrom
 
 We have also added the patch file named `modifications.patch`
 
-### Application and Network logs (chrome/chromium)
-1. in-the-wild (only network logs)
-2. real-traces (both)
-3. original vs modified (both)
-4. dynamic-high (both)
-5. dynamic-low (both)
-6. dynamic-very-low (both)
-7. dynamic-solution (both)
-
-Also, we have uploaded the application and network logs of mozilla firefox under dynamic-very-low bandwidth pattern.
-
-### Application and Network logs (geographical locations) 
-1. delhi
-2. bangalore
-3. new-york
-4. singapore
-5. germany 
-
-# Real World Trace Files
-In addition, we have uploaded mahimahi trace files generated from the real pcaps.
-
 # Modifications for Dynamic Solution
 ### Changes in HTTP/2 Connection
 We have modified the following files in [chromium](https://github.com/chromium/chromium/) codebase:
@@ -52,6 +31,31 @@ We have also added the patch file named `5025_quic_dynamic-sol.patch` and `tcp_d
 `tcp_dynamic_sol.patch` contains patch related to HTTP/2 connection.
 
 We have also added sample files(application logs) for DVL and Rate-Limit UDP.
+
+#Sample Files
+
+### Application and Network logs (chrome/chromium)
+1. in-the-wild (only network logs)
+2. real-traces (both)
+3. original vs modified (both)
+4. dynamic-high (both)
+5. dynamic-low (both)
+6. dynamic-very-low (both)
+7. dynamic-solution (both)
+
+Also, we have uploaded the application and network logs of mozilla firefox under dynamic-very-low bandwidth pattern.
+
+### Application and Network logs (geographical locations) 
+1. delhi
+2. bangalore
+3. new-york
+4. singapore
+5. germany 
+
+# Real World Mahimahi Trace Files
+In addition, we have uploaded mahimahi trace files generated from the real pcaps.
+
+
 
 
 
